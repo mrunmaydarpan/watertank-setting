@@ -1,35 +1,37 @@
 #include <ESP8266WiFi.h>
 #include <ESPAsyncWebServer.h>
+#include <DNSServer.h>
 
 const char *min_ = "min";
 const char *max_ = "max";
 const char *thres_ = "threshold";
 int get_min(0), get_max(0), get_threshold(0);
 String Command;
+const byte DNS_PORT = 53;
 
 AsyncWebServer server(80);
-
+DNSServer dns;
 WiFiClient client;
-
-const char index_html[] PROGMEM = R"rawliteral(
-<!DOCTYPE HTML><html><head><title>WaterTank Setting</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-</head><body>
-<h>WaterTank Setting</h>
-    <form action="/set">
-        <br><br>
-        %setvalue%
-        <br><br>
-        <input type="submit" value="Save">
-    </form>
-</body></html>)rawliteral";
+extern const char index_html[];
 
 String processor(const String &var)
 {
-  if (var == "setvalue")
+  if (var == "setmin")
   {
     String sendValue = "";
-    sendValue += "Min: <input type=\"text\" name=\"min\" value=" + String(get_min) + "><br><br>Max: <input type=\"text\" name=\"max\" value=" + String(get_max) + "><br><br>Start at: <input type=\"text\" name=\"threshold\" value=" + String(get_threshold) + " > ";
+    sendValue += "<input type=\"number\" name=\"min\" maxlength=\"2\" value=" + String(get_min) + " > ";
+    return sendValue;
+  }
+  if (var == "setmax")
+  {
+    String sendValue = "";
+    sendValue += "<input type=\"number\" name=\"max\" maxlength=\"3\" value=" + String(get_max) + "> ";
+    return sendValue;
+  }
+  if (var == "setthreshold")
+  {
+    String sendValue = "";
+    sendValue += "<input type=\"number\" name=\"threshold\" maxlength=\"2\" value=" + String(get_threshold) + "> ";
     return sendValue;
   }
   return String();
@@ -82,9 +84,12 @@ void getData()
 
 void setting_code()
 {
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-            { request->send_P(200, "text/html", index_html, processor); });
-
+  server.onNotFound([](AsyncWebServerRequest *request)
+                    {
+                      Serial.println();
+                      request->send_P(200, "text/html", index_html, processor);
+                      Serial.println("$readSetting:1");
+                    });
   server.on("/set", HTTP_GET, [](AsyncWebServerRequest *request)
             {
               int min;
@@ -96,17 +101,22 @@ void setting_code()
                 min = request->getParam(min_)->value().toInt();
                 max = request->getParam(max_)->value().toInt();
                 threshold = request->getParam(thres_)->value().toInt();
-
-                Serial.printf("$minDistance:%d\n", min ? min : get_min);
-                Serial.printf("$maxDistance:%d\n", max ? max : get_max);
-                Serial.printf("$startAt:%d\n", threshold ? threshold : get_threshold);
-
-                message = "min: ";
-                message += String(min) + '\n';
-                message += "max: ";
-                message += String(max) + '\n';
-                message += "start at: ";
-                message += String(threshold);
+                if (min == 0 || max == 0 || threshold == 0)
+                {
+                  message = "invalid values (\"0\") are not allowed";
+                }
+                else if (min < max && threshold <= 70 && threshold >= 20)
+                {
+                  Serial.printf("$minDistance:%d\n", min ? min : get_min);
+                  Serial.printf("$maxDistance:%d\n", max ? max : get_max);
+                  Serial.printf("$startAt:%d\n", threshold ? threshold : get_threshold);
+                  message = "min: ";
+                  message += String(min) + '\n';
+                  message += "max: ";
+                  message += String(max) + '\n';
+                  message += "start at: ";
+                  message += String(threshold);
+                }
               }
               else
               {
@@ -122,6 +132,7 @@ void setting_code()
               sprintf(data, "min: %d\nmax: %d\nstart at: %d\n", get_min, get_max, get_threshold);
               request->send(200, "text/plain", String(data));
             });
+  dns.start(DNS_PORT, "*", IPAddress(WiFi.softAPIP()));
   server.begin();
 }
 
@@ -141,5 +152,6 @@ void setup()
 
 void loop()
 {
+  dns.processNextRequest();
   getData();
 }
