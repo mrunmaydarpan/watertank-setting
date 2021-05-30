@@ -48,19 +48,19 @@ void parseCommand(String com)
     {
       int i = part2.toInt();
       get_min = i;
-      Serial.println("git min");
+      Serial.println("get min");
     }
     if (part1.equals("$maxDistance"))
     {
       int i = part2.toInt();
       get_max = i;
-      Serial.println("git max");
+      Serial.println("get max");
     }
     if (part1.equals("$startAt"))
     {
       int i = part2.toInt();
       get_threshold = i;
-      Serial.println("git threshold");
+      Serial.println("get threshold");
     }
   }
 }

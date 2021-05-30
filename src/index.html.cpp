@@ -10,6 +10,7 @@
 
         input[type='submit'] {
             background-color: rgb(45, 108, 243);
+            width: 100px;
             color: #ffffff;
         }
 
@@ -46,11 +47,11 @@
 
         <form action="/set">
             <br><br>
-            <label>Overflow distance</label><br>
+            <label>Overflow distance (in cm)</label><br>
             %setmin%
-            <br><br><label>Tank height</label><br>
+            <br><br><label>Tank height (in cm)</label><br>
             %setmax%
-            <br><br><label>Motor start at</label><br>
+            <br><br><label>Motor start at (in cm)</label><br>
             %setthreshold%
             <br><br>
             <input type="submit" value="Save">
