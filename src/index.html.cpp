@@ -51,7 +51,7 @@
             %setmin%
             <br><br><label>Tank height (in cm)</label><br>
             %setmax%
-            <br><br><label>Motor start at (in cm)</label><br>
+            <br><br><label>Motor start at</label><br>
             %setthreshold%
             <br><br>
             <input type="submit" value="Save">

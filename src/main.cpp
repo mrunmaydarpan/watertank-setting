@@ -143,7 +143,7 @@ void setup()
   String ssid = "WaterTank-Setting-";
   ssid += String(ESP.getChipId()).c_str();
   WiFi.mode(WIFI_AP);
-  WiFi.softAP(ssid);
+  WiFi.softAP(ssid, "12345678");
   Serial.print("AP IP: ");
   Serial.println(WiFi.softAPIP());
   setting_code();
