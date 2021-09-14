@@ -5,7 +5,8 @@
 const char *min_ = "min";
 const char *max_ = "max";
 const char *thres_ = "threshold";
-int get_min(0), get_max(0), get_threshold(0);
+const char *stator_ = "stator";
+int get_min(0), get_max(0), get_threshold(0), get_stator(0);
 String Command;
 const byte DNS_PORT = 53;
 
@@ -32,6 +33,12 @@ String processor(const String &var)
   {
     String sendValue = "";
     sendValue += "<input type=\"number\" name=\"threshold\" maxlength=\"2\" value=" + String(get_threshold) + "> ";
+    return sendValue;
+  }
+  if (var == "setstator")
+  {
+    String sendValue = "";
+    sendValue += "<input type=\"number\" name=\"stator\" maxlength=\"1\" value=" + String(get_stator) + " > ";
     return sendValue;
   }
   return String();
@@ -61,6 +68,12 @@ void parseCommand(String com)
       int i = part2.toInt();
       get_threshold = i;
       Serial.println("get threshold");
+    }
+    if (part1.equals("$stator"))
+    {
+      int i = part2.toInt();
+      get_stator = i;
+      Serial.print("get stator");
     }
   }
 }
@@ -95,27 +108,32 @@ void setting_code()
               int min;
               int max;
               int threshold;
+              int stator;
               String message;
-              if (request->hasParam(min_) && request->hasParam(max_) && request->hasParam(thres_))
+              if (request->hasParam(min_) && request->hasParam(max_) && request->hasParam(thres_) && request->hasParam(stator_))
               {
                 min = request->getParam(min_)->value().toInt();
                 max = request->getParam(max_)->value().toInt();
                 threshold = request->getParam(thres_)->value().toInt();
+                stator = request->getParam(stator_)->value().toInt();
                 if (min == 0 || max == 0 || threshold == 0)
                 {
                   message = "invalid values (\"0\") are not allowed";
                 }
-                else if (min < max && threshold <= 70 && threshold >= 20)
+                else if (min < max && threshold <= 70 && threshold >= 20 && stator < 4 && stator != 0)
                 {
                   Serial.printf("$minDistance:%d\n", min ? min : get_min);
                   Serial.printf("$maxDistance:%d\n", max ? max : get_max);
                   Serial.printf("$startAt:%d\n", threshold ? threshold : get_threshold);
+                  Serial.printf("$stator:%d\n", stator ? stator : get_stator);
                   message = "min: ";
                   message += String(min) + '\n';
                   message += "max: ";
                   message += String(max) + '\n';
                   message += "start at: ";
-                  message += String(threshold);
+                  message += String(threshold) + '\n';
+                  message += "stator: ";
+                  message += String(stator);
                 }
               }
               else
@@ -125,13 +143,13 @@ void setting_code()
               Serial.println("$readSetting:1");
               request->send(200, "text/plain", message);
             });
-  server.on("/get", HTTP_GET, [](AsyncWebServerRequest *request)
-            {
-              Serial.println("$readSetting:1");
-              char data[32];
-              sprintf(data, "min: %d\nmax: %d\nstart at: %d\n", get_min, get_max, get_threshold);
-              request->send(200, "text/plain", String(data));
-            });
+  // server.on("/get", HTTP_GET, [](AsyncWebServerRequest *request)
+  //           {
+  //             Serial.println("$readSetting:1");
+  //             char data[32];
+  //             sprintf(data, "min: %d\nmax: %d\nstart at: %d\n", get_min, get_max, get_threshold);
+  //             request->send(200, "text/plain", String(data));
+  //           });
   dns.start(DNS_PORT, "*", IPAddress(WiFi.softAPIP()));
   server.begin();
 }

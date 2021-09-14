@@ -14,6 +14,10 @@
             color: #ffffff;
         }
 
+        input[type=submit]:hover {
+            background-color: #45a049;
+        }
+
         input {
             width: 30%;
             height: 44px;
@@ -31,8 +35,15 @@
             text-align: center;
             font-family: verdana, sans-serif;
             border-radius: 5px;
+            background-color: rgb(224, 211, 211);
+            color: rgb(0, 0, 0);
+            padding: 20px;
+        }
+
+        div {
+            border-radius: 5px;
             background-color: rgb(23, 23, 23);
-            color: whitesmoke;
+            color: #ffffff;
             padding: 20px;
         }
     </style>
@@ -44,18 +55,21 @@
 
     <body>
         <h1>TANK SETTING</h1>
-
-        <form action="/set">
-            <br><br>
-            <label>Overflow distance (in cm)</label><br>
-            %setmin%
-            <br><br><label>Tank height (in cm)</label><br>
-            %setmax%
-            <br><br><label>Motor start at</label><br>
-            %setthreshold%
-            <br><br>
-            <input type="submit" value="Save">
-        </form>
+        <div>
+            <form action="/set">
+                <br><br>
+                <label>Overflow distance (in cm)</label><br>
+                %setmin%
+                <br><br><label>Tank height (in cm)</label><br>
+                %setmax%
+                <br><br><label>Motor start at</label><br>
+                %setthreshold%
+                <br><br><label>Stator</label><br>
+                %setstator%
+                <br>
+                <input type="submit" value="Save">
+            </form>
+        </div>
     </body>
 
     </html>
