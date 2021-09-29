@@ -2,6 +2,16 @@
 #include <ESPAsyncWebServer.h>
 #include <DNSServer.h>
 
+#define debug_state false
+
+#if debug_state
+#define debug(x) Serial.print(x)
+#define debugln(x) Serial.println(x)
+#else
+#define debug(x)
+#define debugln(x)
+#endif
+
 const char *min_ = "min";
 const char *max_ = "max";
 const char *thres_ = "threshold";
@@ -51,29 +61,29 @@ void parseCommand(String com)
     String part1 = com.substring(0, com.indexOf(":"));
     String part2 = com.substring(com.indexOf(":") + 1);
 
-    if (part1.equals("$minDistance"))
+    if (part1.equals("$minD"))
     {
       int i = part2.toInt();
       get_min = i;
-      Serial.println("get min");
+      debugln("get min");
     }
-    if (part1.equals("$maxDistance"))
+    if (part1.equals("$maxD"))
     {
       int i = part2.toInt();
       get_max = i;
-      Serial.println("get max");
+      debugln("get max");
     }
     if (part1.equals("$startAt"))
     {
       int i = part2.toInt();
       get_threshold = i;
-      Serial.println("get threshold");
+      debugln("get threshold");
     }
-    if (part1.equals("$stator"))
+    if (part1.equals("$type"))
     {
       int i = part2.toInt();
       get_stator = i;
-      Serial.print("get stator");
+      debug("get stator");
     }
   }
 }
@@ -122,10 +132,15 @@ void setting_code()
                 }
                 else if (min < max && threshold <= 70 && threshold >= 20 && stator < 4 && stator != 0)
                 {
-                  Serial.printf("$minDistance:%d\n", min ? min : get_min);
-                  Serial.printf("$maxDistance:%d\n", max ? max : get_max);
+                  delay(50);
+                  Serial.printf("$minD:%d\n", min ? min : get_min);
+                  delay(50);
+                  Serial.printf("$maxD:%d\n", max ? max : get_max);
+                  delay(50);
                   Serial.printf("$startAt:%d\n", threshold ? threshold : get_threshold);
-                  Serial.printf("$stator:%d\n", stator ? stator : get_stator);
+                  delay(50);
+                  Serial.printf("$type:%d\n", stator ? stator : get_stator);
+                  delay(50);
                   message = "min: ";
                   message += String(min) + '\n';
                   message += "max: ";
@@ -162,8 +177,8 @@ void setup()
   ssid += String(ESP.getChipId()).c_str();
   WiFi.mode(WIFI_AP);
   WiFi.softAP(ssid, "12345678");
-  Serial.print("AP IP: ");
-  Serial.println(WiFi.softAPIP());
+  debug("AP IP: ");
+  debugln(WiFi.softAPIP());
   setting_code();
   Serial.println("$readSetting:1");
 }
